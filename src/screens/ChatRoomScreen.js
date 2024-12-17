@@ -17,10 +17,12 @@ import { receiveMessage, getMessagesInRoom } from '../store/slices/messageSlice'
 import { io } from 'socket.io-client';
 
 const ChatRoomScreen = ({ route, navigation }) => {
-    const { chatRoomId, userId, chatRoomName, avatar } = route.params;
+    const { chatRoomId, userId, recipient_id, chatRoomName, avatar } = route.params;
     const [newMessage, setNewMessage] = useState('');
     const [isAtBottom, setIsAtBottom] = useState(true); // State kiểm tra vị trí cuộn
     const dispatch = useDispatch();
+
+    const Recipient_id = recipient_id;
 
     // Lấy tin nhắn từ Redux
     const { rooms } = useSelector((state) => state.messages);
@@ -28,7 +30,7 @@ const ChatRoomScreen = ({ route, navigation }) => {
     const { messages, cursor, hasMore } = room;
 
     const flatListRef = useRef();
-    const socket = io('http://192.168.0.105:5559');
+    const socket = io('https://social-be-hyzv.onrender.com'); //https://social-be-hyzv.onrender.com
 
     useEffect(() => {
         if (!rooms[chatRoomId]?.messages.length) {
@@ -42,6 +44,9 @@ const ChatRoomScreen = ({ route, navigation }) => {
 
         return () => socket.disconnect();
     }, [chatRoomId, dispatch]);
+
+    console.log('userId', userId);
+    console.log("Recipient_id", Recipient_id);
 
     // Chỉ cuộn xuống khi người dùng đang ở cuối danh sách
     useEffect(() => {

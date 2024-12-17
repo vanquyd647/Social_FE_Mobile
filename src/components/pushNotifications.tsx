@@ -47,7 +47,7 @@ const useFirebaseMessaging = () => {
     });
 
     const unsubscribe = messaging().onMessage(async (remoteMessage) => {
-      Alert.alert('A new FCM message arrived!', JSON.stringify(remoteMessage));
+      // Alert.alert('A new FCM message arrived!', JSON.stringify(remoteMessage));
     });
 
     // Return the unsubscribe function directly for the cleanup

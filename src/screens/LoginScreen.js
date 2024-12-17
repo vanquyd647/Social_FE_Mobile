@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
+import messaging from '@react-native-firebase/messaging';
 import { login } from '../store/slices/authSlice';
 
 const LoginScreen = ({ navigation }) => {
@@ -9,12 +10,29 @@ const LoginScreen = ({ navigation }) => {
     const dispatch = useDispatch();
     const { loading, error } = useSelector((state) => state.auth);
 
+    // Inside your component
     const handleLogin = async () => {
-        const result = await dispatch(login({ email, password }));
-        if (login.fulfilled.match(result)) {
-            navigation.replace('MainTabs');
-        } else {
-            Alert.alert('Login Failed', result.payload || 'Something went wrong');
+        try {
+            // Lấy Firebase Token
+            const firebaseToken = await messaging().getToken();
+
+            // Dispatch action login với Firebase Token
+            const result = await dispatch(
+                login({
+                    email,
+                    password,
+                    firebaseToken, // Gửi Firebase Token lên server
+                })
+            );
+
+            if (login.fulfilled.match(result)) {
+                navigation.replace('MainTabs');
+            } else {
+                Alert.alert('Login Failed', result.payload || 'Something went wrong');
+            }
+        } catch (error) {
+            console.error('Error getting Firebase Token:', error);
+            Alert.alert('Error', 'Failed to get notification token');
         }
     };
 

@@ -33,7 +33,7 @@ const ChatListScreen = ({ navigation }) => {
     dispatch(setCurrentChatRoom(chatRoom));
 
     // Navigate to the Chat Room screen, passing chatRoomId and userId as params
-    navigation.navigate('ChatRoom', { chatRoomId: chatRoom._id, userId, chatRoomName: chatRoom.displayName, avatar: chatRoom.avatar });
+    navigation.navigate('ChatRoom', { chatRoomId: chatRoom._id, userId, recipient_id: chatRoom.recipient_id, chatRoomName: chatRoom.displayName, avatar: chatRoom.avatar });
   };
 
   const renderItem = ({ item }) => (

@@ -23,6 +23,7 @@ export const getUserChats = createAsyncThunk(
             return {
                 chatRooms: response.data.chatRooms, // Danh sách phòng chat
                 userId: response.data.userId,       // userId của người dùng
+                recipient_id: response.data.recipient_id, // Thêm recipient_id vào state
             };
         } catch (error) {
             return rejectWithValue(error.response?.data || error.message); // Trả về lỗi nếu có
@@ -37,6 +38,7 @@ const chatSlice = createSlice({
         chatRooms: [],
         currentChatRoom: null,
         userId: null,  // Thêm userId vào state
+        recipient_id: null, // Thêm recipient_id vào state
         loading: false,
         error: null,
     },
@@ -71,6 +73,7 @@ const chatSlice = createSlice({
                 state.loading = false; // Lấy danh sách phòng chat thành công
                 state.chatRooms = action.payload.chatRooms;  // Cập nhật danh sách phòng chat
                 state.userId = action.payload.userId;  // Cập nhật userId
+                state.recipient_id = action.payload.recipient_id; // Cập nhật recipient
             })
             .addCase(getUserChats.rejected, (state, action) => {
                 state.loading = false; // Lỗi khi lấy danh sách phòng chat

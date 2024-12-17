@@ -4,8 +4,8 @@ import handleExpiredToken from '../utils/authMiddleware'; // Import middleware
 
 // Tạo một client axios chung
 const apiClient = axios.create({
-    // baseURL: 'https://social-be-hyzv.onrender.com/api/', // Base URL của API backend http://10.0.2.2:5559/api/
-    baseURL: 'http://192.168.0.105:5559/api/',
+    baseURL: 'https://social-be-hyzv.onrender.com/api/', // Base URL của API backend http://10.0.2.2:5559/api/
+    // baseURL: 'http://192.168.0.105:5559/api/',
     headers: {
         'Content-Type': 'application/json',
     },
