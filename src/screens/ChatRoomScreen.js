@@ -19,9 +19,10 @@ import { io } from 'socket.io-client';
 const ChatRoomScreen = ({ route, navigation }) => {
     const { chatRoomId, userId, chatRoomName, avatar } = route.params;
     const [newMessage, setNewMessage] = useState('');
+    const [isAtBottom, setIsAtBottom] = useState(true); // State kiểm tra vị trí cuộn
     const dispatch = useDispatch();
 
-    // Lấy tin nhắn theo roomId từ Redux
+    // Lấy tin nhắn từ Redux
     const { rooms } = useSelector((state) => state.messages);
     const room = rooms[chatRoomId] || { messages: [], cursor: null, hasMore: true };
     const { messages, cursor, hasMore } = room;
@@ -30,26 +31,24 @@ const ChatRoomScreen = ({ route, navigation }) => {
     const socket = io('http://192.168.0.105:5559');
 
     useEffect(() => {
-        // Lấy tin nhắn ban đầu của phòng
         if (!rooms[chatRoomId]?.messages.length) {
             dispatch(getMessagesInRoom({ roomId: chatRoomId, cursor: null }));
         }
-        // Tham gia vào phòng qua socket
+
         socket.emit('joinRoom', chatRoomId);
         socket.on('receiveMessage', (message) => {
             dispatch(receiveMessage({ roomId: chatRoomId, message }));
         });
 
-        return () => {
-            socket.disconnect();
-        };
+        return () => socket.disconnect();
     }, [chatRoomId, dispatch]);
 
+    // Chỉ cuộn xuống khi người dùng đang ở cuối danh sách
     useEffect(() => {
-        if (flatListRef.current && messages.length > 0) {
+        if (isAtBottom && flatListRef.current && messages.length > 0) {
             flatListRef.current.scrollToOffset({ offset: 0, animated: true });
         }
-    }, [messages]);
+    }, [messages, isAtBottom]);
 
     const handleSendMessage = () => {
         if (newMessage.trim()) {
@@ -60,11 +59,7 @@ const ChatRoomScreen = ({ route, navigation }) => {
                 timestamp: new Date(),
             };
 
-            // Gửi tin nhắn qua socket
             socket.emit('sendMessage', message);
-
-            // Cập nhật tin nhắn ngay lập tức trong Redux
-            // dispatch(receiveMessage({ roomId: chatRoomId, message }));
             setNewMessage('');
         }
     };
@@ -73,6 +68,14 @@ const ChatRoomScreen = ({ route, navigation }) => {
         if (hasMore && !rooms[chatRoomId]?.loadingFetch) {
             dispatch(getMessagesInRoom({ roomId: chatRoomId, cursor }));
         }
+    };
+
+    // Kiểm tra người dùng có ở vị trí cuối cùng không
+    const handleScroll = (event) => {
+        const { contentOffset, contentSize, layoutMeasurement } = event.nativeEvent;
+        const isNearBottom =
+            contentOffset.y <= layoutMeasurement.height - contentSize.height + 20;
+        setIsAtBottom(isNearBottom);
     };
 
     return (
@@ -87,12 +90,6 @@ const ChatRoomScreen = ({ route, navigation }) => {
 
             {rooms[chatRoomId]?.loadingFetch ? (
                 <Text>Loading...</Text>
-            ) : rooms[chatRoomId]?.error ? (
-                <Text style={{ color: 'red' }}>
-                    {typeof rooms[chatRoomId].error === 'object' 
-                        ? JSON.stringify(rooms[chatRoomId].error) 
-                        : rooms[chatRoomId].error}
-                </Text>
             ) : (
                 <FlatList
                     ref={flatListRef}
@@ -101,6 +98,7 @@ const ChatRoomScreen = ({ route, navigation }) => {
                     inverted
                     onEndReached={loadMoreMessages}
                     onEndReachedThreshold={0.1}
+                    onScroll={handleScroll} // Theo dõi vị trí cuộn
                     renderItem={({ item }) => {
                         const isSentByCurrentUser = item.sender_id === userId;
                         return (
