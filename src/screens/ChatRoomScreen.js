@@ -14,6 +14,7 @@ import {
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { useDispatch, useSelector } from 'react-redux';
 import { receiveMessage, getMessagesInRoom } from '../store/slices/messageSlice';
+import { getUser } from '../store/slices/authSlice';
 import { io } from 'socket.io-client';
 
 const ChatRoomScreen = ({ route, navigation }) => {
@@ -24,6 +25,7 @@ const ChatRoomScreen = ({ route, navigation }) => {
 
     const Recipient_id = recipient_id;
 
+    const { user } = useSelector((state) => state.auth);
     // Lấy tin nhắn từ Redux
     const { rooms } = useSelector((state) => state.messages);
     const room = rooms[chatRoomId] || { messages: [], cursor: null, hasMore: true };
@@ -33,19 +35,26 @@ const ChatRoomScreen = ({ route, navigation }) => {
     const socket = io('https://social-be-hyzv.onrender.com'); //https://social-be-hyzv.onrender.com
 
     useEffect(() => {
+        // Chỉ gọi API nếu thông tin người dùng chưa được tải
+        if (!user) {
+            dispatch(getUser());
+        }
+        
         if (!rooms[chatRoomId]?.messages.length) {
             dispatch(getMessagesInRoom({ roomId: chatRoomId, cursor: null }));
         }
-
+    
         socket.emit('joinRoom', chatRoomId);
         socket.on('receiveMessage', (message) => {
             dispatch(receiveMessage({ roomId: chatRoomId, message }));
         });
-
+    
         return () => socket.disconnect();
-    }, [chatRoomId, dispatch]);
+    }, [chatRoomId, dispatch, user]); // user phụ thuộc để chỉ load một lần
+    
 
     console.log('userId', userId);
+    console.log("user", user);
     console.log("Recipient_id", Recipient_id);
 
     // Chỉ cuộn xuống khi người dùng đang ở cuối danh sách
@@ -60,6 +69,7 @@ const ChatRoomScreen = ({ route, navigation }) => {
             const message = {
                 room_id: chatRoomId,
                 sender_id: userId,
+                sender_name: user.username,
                 content: newMessage,
                 timestamp: new Date(),
             };

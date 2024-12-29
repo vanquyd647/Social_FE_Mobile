@@ -4,14 +4,16 @@ import postReducer from './slices/postSlice';
 import friendReducer from './slices/friendSlice';
 import chatReducer from './slices/chatSlice';
 import messageReducer from './slices/messageSlice';
-
+import notificationReducer from './slices/notificationSlice';
+ 
 const store = configureStore({
     reducer: {
         auth: authReducer,
         posts: postReducer,
         friends: friendReducer,
         chats: chatReducer,
-        messages: messageReducer
+        messages: messageReducer,
+        notifications: notificationReducer,
     },
 
     middleware: (getDefaultMiddleware) =>

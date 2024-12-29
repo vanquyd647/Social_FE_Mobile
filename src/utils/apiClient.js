@@ -84,4 +84,14 @@ const messageApi = {
 
 };
 
-export { userApi, postApi, friendApi, chatApi, messageApi }; // Export APIs
+// API cho notifications
+const notificationApi = {
+    // Lấy danh sách thông báo
+    getNotifications: () => apiClient.get('notifications'),
+
+    // Đánh dấu thông báo đã đọc
+    markAsRead: (notificationId) => apiClient.put(`notifications/${notificationId}`),
+};
+
+
+export { userApi, postApi, friendApi, chatApi, messageApi, notificationApi }; // Export APIs

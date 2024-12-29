@@ -37,6 +37,8 @@ const ProfileScreen = () => {
         }, [dispatch, token, isAuthenticated]) // Hook sẽ chạy lại khi các giá trị này thay đổi
     );
 
+    console.log("user", user);
+
     const handleLogout = () => {
         dispatch(logout()); // Dispatch logout action to clear user data and token
     };
